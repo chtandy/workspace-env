@@ -1,0 +1,21 @@
+version: '3'
+services:
+  workspace:
+    image: workspace
+    container_name: workspace
+    build:
+      context: ./
+    hostname: workspace
+    restart: always
+    environment:
+      - USERNAME=${USERNAME}
+      - USER_ID=${USER_ID}
+      - UserAuthPubKey=${UserAuthPubKey}
+      #- ROOT_PASSWD=
+    volumes:
+      - ./data:/data
+    dns:
+      - 10.1.5.12
+    ports:
+      - "1021:22"
+

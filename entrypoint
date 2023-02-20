@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+## create user and add to root group
+
+## 建立使用者
+if [[ x${USERNAME} != x && x${USER_ID} != x && x${UserAuthPubKey} != x ]]; then
+    useradd -m -G sudo,root -u ${USER_ID} -s /bin/bash ${USERNAME}
+    mkdir /home/${USERNAME}/.ssh && touch /home/${USERNAME}/.ssh/authorized_keys
+    echo ${UserAuthPubKey} > /home/${USERNAME}/.ssh/authorized_keys
+    chown -R ${USER_ID}:${USER_ID} /home/${USERNAME} && chown ${USER_ID}:${USER_ID} /data
+    cp /root/.bashrc /home/${USERNAME}/.bashrc
+    ## 使用sudo 免密碼
+    echo "${USERNAME} ALL=NOPASSWD: ALL" >> /etc/sudoers
+elif [ x${ROOT_PASSWD} != x ]; then
+    ## 讓root 可以ssh 登入
+    sed -i 's|^PasswordAuthentication.*|PasswordAuthentication yes|' /etc/ssh/sshd_config
+    sed -i 's|^#PermitRootLogin prohibit-password|PermitRootLogin yes|' /etc/ssh/sshd_config
+    echo root:${ROOT_PASSWD} | chpasswd
+fi
+
+exec /usr/sbin/sshd -D
